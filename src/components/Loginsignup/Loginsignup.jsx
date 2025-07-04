@@ -34,7 +34,10 @@ const Loginsignup = () => {
       const data = await res.json();
 
       if (res.ok) {
-        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify({
+        token: data.token,
+        user: data.user
+        }));
         setResponseMsg(data.message);
         navigate('/home');
       } else {

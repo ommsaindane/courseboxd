@@ -54,7 +54,14 @@ app.post('/api/login', async (req, res) => {
   if (!match) return res.status(401).json({ error: 'Invalid credentials' });
 
   const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
-  res.json({ token, username: user.username });
+  res.json({
+  token,
+  user: {
+    username: user.username,
+    email: user.email
+  },
+  message: "Login successful"
+  });
 });
 
 const crypto = require("crypto");
@@ -111,5 +118,4 @@ app.get('/api/profile', (req, res) => {
 app.listen(PORT, () => {
   console.log(`API Server running at http://localhost:${PORT}`);
 });
-
 

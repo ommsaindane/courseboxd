@@ -1,13 +1,20 @@
-import React from 'react'
+import React from 'react';
+import Navbar from '../Navbar/Navbar';
 
-function Homepage() {
+const Homepage = () => {
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+  const username = storedUser?.user?.username || "User";
+
+
   return (
-    <div style={{ color: 'white', padding: '2rem' }}>
-      <h1>Welcome to CourseBoxd!</h1>
-      <p>Your personalized course dashboard.</p>
+    <div>
+      <Navbar username={username} />
+      <div style={{ padding: '20px' }}>
+        <h1>Welcome to Courseboxd 🎓</h1>
+        {/* Course Dashboard content here */}
+      </div>
     </div>
   );
-}
+};
 
-
-export default Homepage
+export default Homepage;
