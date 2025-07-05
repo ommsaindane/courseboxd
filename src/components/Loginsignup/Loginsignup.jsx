@@ -1,6 +1,91 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Loginsignup.css';
+import {
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
+
+const Container = styled(Box)(({ theme }) => ({
+  width: '100%',
+  maxWidth: 400,
+  margin: 'auto',
+  marginTop: theme.spacing(10),
+  backgroundColor: '#2c2c2c',
+  borderRadius: theme.spacing(2),
+  padding: theme.spacing(4),
+  color: '#fff',
+  boxShadow: '0 0 10px rgba(0,0,0,0.5)',
+}));
+
+const Header = styled(Box)({
+  textAlign: 'center',
+  marginBottom: 24,
+});
+
+const Title = styled(Typography)({
+  fontSize: 32,
+  fontWeight: 'bold',
+  marginBottom: 8,
+});
+
+const Underline = styled(Box)({
+  width: 60,
+  height: 4,
+  backgroundColor: '#90caf9',
+  margin: '0 auto',
+  borderRadius: 2,
+});
+
+const StyledTextField = styled(TextField)(({ theme }) => ({
+  marginTop: theme.spacing(2),
+  '& .MuiInputBase-input': {
+    color: 'white',
+  },
+  '& .MuiInputLabel-root': {
+    color: 'gray',
+  },
+  '& .MuiOutlinedInput-root': {
+    '& fieldset': {
+      borderColor: 'gray',
+    },
+    '&:hover fieldset': {
+      borderColor: '#90caf9',
+    },
+    '&.Mui-focused fieldset': {
+      borderColor: '#90caf9',
+    },
+  },
+}));
+
+const ForgotPassword = styled(Typography)({
+  marginTop: 12,
+  textAlign: 'right',
+  color: '#90caf9',
+  fontSize: 14,
+  cursor: 'pointer',
+});
+
+const SubmitContainer = styled(Box)({
+  marginTop: 32,
+  display: 'flex',
+  justifyContent: 'space-between',
+});
+
+const StyledButton = styled(Button)(({ theme }) => ({
+  width: '48%',
+}));
+
+const Message = styled(Typography)({
+  marginTop: 20,
+  color: 'white',
+});
 
 const Loginsignup = () => {
   const [action, setAction] = useState("Login");
@@ -35,8 +120,8 @@ const Loginsignup = () => {
 
       if (res.ok) {
         localStorage.setItem("user", JSON.stringify({
-        token: data.token,
-        user: data.user
+          token: data.token,
+          user: data.user
         }));
         setResponseMsg(data.message);
         navigate('/home');
@@ -75,90 +160,100 @@ const Loginsignup = () => {
   };
 
   return (
-    <div className='container'>
-      <div className='header'>
-        <div className='text'>{action}</div>
-        <div className='underline'></div>
-      </div>
+    <>
+      <Container>
+        <Header>
+          <Title>{action}</Title>
+          <Underline />
+        </Header>
 
-      <div className='inputs'>
         {action === "Sign Up" && (
-          <div className='input'>
-            <input
-              type='text'
-              placeholder='Username'
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-          </div>
+          <StyledTextField
+            label="Username"
+            fullWidth
+            variant="outlined"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
         )}
 
-        <div className='input'>
-          <input
-            type='email'
-            placeholder='Email'
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
+        <StyledTextField
+          label="Email"
+          type="email"
+          fullWidth
+          variant="outlined"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
-        <div className='input'>
-          <input
-            type='password'
-            placeholder='Password'
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-      </div>
+        <StyledTextField
+          label="Password"
+          type="password"
+          fullWidth
+          variant="outlined"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
 
-      {action === "Login" && (
-        <div className="forgot-password">
-          <span onClick={() => setShowForgotPopup(true)}>Forgot password?</span>
-        </div>
-      )}
+        {action === "Login" && (
+          <ForgotPassword onClick={() => setShowForgotPopup(true)}>
+            Forgot password?
+          </ForgotPassword>
+        )}
 
-      <div className="submit-container">
-        <div
-          className={action === "Login" ? "submit gray" : "submit"}
-          onClick={() => handleActionClick("Sign Up")}
-        >
-          Sign up
-        </div>
-        <div
-          className={action === "Sign Up" ? "submit gray" : "submit"}
-          onClick={() => handleActionClick("Login")}
-        >
-          Login
-        </div>
-      </div>
+        <SubmitContainer>
+          <StyledButton
+            variant={action === "Login" ? "outlined" : "contained"}
+            onClick={() => handleActionClick("Sign Up")}
+            color="primary"
+          >
+            Sign Up
+          </StyledButton>
+          <StyledButton
+            variant={action === "Sign Up" ? "outlined" : "contained"}
+            onClick={() => handleActionClick("Login")}
+            color="primary"
+          >
+            Login
+          </StyledButton>
+        </SubmitContainer>
 
-      {responseMsg && (
-        <p style={{ marginTop: '10px', color: 'white' }}>{responseMsg}</p>
-      )}
+        {responseMsg && (
+          <Message>{responseMsg}</Message>
+        )}
+      </Container>
 
       {/* Forgot Password Popup */}
-      {showForgotPopup && (
-        <div className="popup-overlay">
-          <div className="popup">
-            <h3>Reset Password</h3>
-            <input
-              type="email"
-              placeholder="Enter your email"
-              value={resetEmail}
-              onChange={(e) => setResetEmail(e.target.value)}
-            />
-            <button onClick={handleForgotPassword}>Send Reset Link</button>
-            <button className="close-btn" onClick={() => {
+      <Dialog open={showForgotPopup} onClose={() => setShowForgotPopup(false)}>
+        <DialogTitle>Reset Password</DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            label="Enter your email"
+            type="email"
+            variant="outlined"
+            value={resetEmail}
+            onChange={(e) => setResetEmail(e.target.value)}
+            sx={{ marginBottom: 2 }}
+          />
+          {resetMsg && <Typography color="error">{resetMsg}</Typography>}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleForgotPassword} color="primary">
+            Send Reset Link
+          </Button>
+          <Button
+            onClick={() => {
               setShowForgotPopup(false);
-              setResetMsg('');
               setResetEmail('');
-            }}>Close</button>
-            {resetMsg && <p className="popup-message">{resetMsg}</p>}
-          </div>
-        </div>
-      )}
-    </div>
+              setResetMsg('');
+            }}
+          >
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 };
 
