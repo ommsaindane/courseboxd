@@ -5,16 +5,18 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
+const scrapeRoutes = require('./routes/scrape');
+
 const sendEmail = require('./utils/sendEmail');
 const User = require('./models/User');
+const userRoutes = require('./routes/user'); // Optional: mount additional routes here
 
-
-const app = express();
-const PORT = 5000;
+const app = express(); // ✅ Must come before app.use() calls
+const PORT = process.env.PORT || 5000;
 const SECRET = process.env.JWT_SECRET;
 
-
-
+// ✅ Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
@@ -24,14 +26,19 @@ mongoose.connect(process.env.MONGO_URI, {
   console.error("❌ MongoDB connection error:", err);
 });
 
+// ✅ Middlewares
 app.use(cors());
 app.use(express.json());
 
+// ✅ Optional userRoutes if needed
+app.use('/api/user', userRoutes);
+
+// ✅ Token generator
 const generateToken = (user) => {
   return jwt.sign({ email: user.email, username: user.username }, SECRET, { expiresIn: '1h' });
 };
 
-
+// ✅ Signup Route
 app.post('/api/signup', async (req, res) => {
   const { username, email, password } = req.body;
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -44,6 +51,7 @@ app.post('/api/signup', async (req, res) => {
   }
 });
 
+// ✅ Login Route
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -53,19 +61,19 @@ app.post('/api/login', async (req, res) => {
   const match = await bcrypt.compare(password, user.password);
   if (!match) return res.status(401).json({ error: 'Invalid credentials' });
 
-  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+  const token = jwt.sign({ id: user._id }, SECRET, { expiresIn: '1d' });
+
   res.json({
-  token,
-  user: {
-    username: user.username,
-    email: user.email
-  },
-  message: "Login successful"
+    token,
+    user: {
+      username: user.username,
+      email: user.email
+    },
+    message: "Login successful"
   });
 });
 
-const crypto = require("crypto");
-
+// ✅ Forgot Password
 app.post('/api/forgot-password', async (req, res) => {
   const { email } = req.body;
 
@@ -83,6 +91,7 @@ app.post('/api/forgot-password', async (req, res) => {
   res.json({ message: 'Reset link sent to email' });
 });
 
+// ✅ Reset Password
 app.post('/api/reset-password/:token', async (req, res) => {
   const { token } = req.params;
   const { password } = req.body;
@@ -102,10 +111,10 @@ app.post('/api/reset-password/:token', async (req, res) => {
   res.json({ message: 'Password reset successful' });
 });
 
-
+// ✅ Protected Profile Endpoint
 app.get('/api/profile', (req, res) => {
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // "Bearer <token>"
+  const token = authHeader && authHeader.split(' ')[1]; // Bearer <token>
 
   if (!token) return res.sendStatus(401);
 
@@ -115,7 +124,9 @@ app.get('/api/profile', (req, res) => {
   });
 });
 
+// ✅ Start Server
 app.listen(PORT, () => {
-  console.log(`API Server running at http://localhost:${PORT}`);
+  console.log(`🚀 API Server running at http://localhost:${PORT}`);
 });
 
+app.use('/api/scrape', scrapeRoutes);

@@ -62,7 +62,7 @@ const Homepage = () => {
     <PageWrapper>
       <Navbar username={username} />
       <ContentWrapper>
-        <Box textAlign="center">
+        <Box textAlign="center" sx={{ fontSize: { xs: '2rem', sm: '3rem', md: '4rem'}}}>
           <SplitText
             text={`Welcome back, ${username}`}
             className="text-2xl font-semibold text-center"
